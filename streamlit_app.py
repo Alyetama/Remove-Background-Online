@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 from gotipy import Gotify
 from loguru import logger
 from rembg.bg import remove
+import download_model
 
 
 def remove_bg(input_data, path):
@@ -43,6 +44,7 @@ def gif2frames(input_file, skip_every=1):
     return frames
 
 def main():
+    download_model()
     if GOTIFY:
         g = Gotify(host_address=os.getenv('GOTIFY_HOST_ADDRESS'),
                    fixed_token=os.getenv('GOTIFY_APP_TOKEN'),
@@ -195,7 +197,7 @@ def main():
                 finally:
                     st.session_state['key'] = K
                     st.session_state['processed'] = True
-                    
+
 if __name__ == '__main__':
     st.set_page_config(page_title='Remove Background',
                        page_icon='✂️',
