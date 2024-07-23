@@ -42,7 +42,6 @@ def gif2frames(input_file, skip_every=1):
         frames.append((n, bytes_obj.getvalue()))
     return frames
 
-
 def main():
     if GOTIFY:
         g = Gotify(host_address=os.getenv('GOTIFY_HOST_ADDRESS'),
@@ -51,17 +50,29 @@ def main():
 
     if st.sidebar.button('CLEAR'):
         st.session_state['key'] = K
+        st.session_state['processed'] = False
+        st.session_state['cleared'] = True
         st.experimental_rerun()
     st.sidebar.markdown('---')
 
     accept_multiple_files = True
     accepted_type = ['png', 'jpg', 'jpeg', 'gif']
 
+    if 'processed' not in st.session_state:
+        st.session_state['processed'] = False
+
+    if 'cleared' not in st.session_state:
+        st.session_state['cleared'] = True
+
     uploaded_files = st.sidebar.file_uploader(
         f'Choose one or multiple files (max: {MAX_FILES})',
         type=accepted_type,
         accept_multiple_files=accept_multiple_files,
-        key=st.session_state['key'])
+        key=st.session_state['key'],
+        disabled=not st.session_state['cleared'])
+
+    if uploaded_files:
+        st.session_state['cleared'] = False
 
     if len(uploaded_files) > MAX_FILES != -1:
         st.warning(
@@ -138,7 +149,7 @@ def main():
                     pb.progress(cur_progress * n)
                 time.sleep(1)
                 progress_bar.empty()
-                pb.success('Complete!')
+                pb.success('Complete! Please press CLEAR to upload new files.')
 
                 nobg_images = [x[0] for x in nobg_imgs]
 
@@ -183,8 +194,8 @@ def main():
                     st.error('No more images to process!')
                 finally:
                     st.session_state['key'] = K
-
-
+                    st.session_state['processed'] = True
+                    
 if __name__ == '__main__':
     st.set_page_config(page_title='Remove Background',
                        page_icon='✂️',
