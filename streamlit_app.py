@@ -17,18 +17,26 @@ from gotipy import Gotify
 from loguru import logger
 import onnxruntime as ort
 import numpy as np
+import onnx
+from onnxruntime.quantization import quantize_dynamic, QuantType
 
 from urllib import request
 
 def download_model():
     model_dir = Path('models')
     model_path = model_dir / 'u2net_human_seg.onnx'
+    quantized_model_path = model_dir / 'u2net_human_seg_quant.onnx'
+    
     if not model_path.exists():
         model_dir.mkdir(parents=True, exist_ok=True)
         model_url = 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_human_seg.onnx'
         # model_url = 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_cloth_seg.onnx'
         request.urlretrieve(model_url, model_path)
-    return model_path
+        
+        # Quantize the model
+        quantize_dynamic(model_path, quantized_model_path, weight_type=QuantType.QUInt8)
+    
+    return quantized_model_path
 
 def remove_bg(input_data, path):
     model_path = download_model()
