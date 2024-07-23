@@ -19,6 +19,9 @@ from rembg.bg import remove
 
 import onnxruntime as ort
 
+import onnxruntime as ort
+import numpy as np
+
 def download_model():
     model_dir = Path.home() / '.u2net'
     model_path = model_dir / 'u2net.onnx'
@@ -31,12 +34,31 @@ def download_model():
 def remove_bg(input_data, path):
     model_path = download_model()
     session = ort.InferenceSession(str(model_path))
-    result = remove(input_data, session=session)
-    img = Image.open(io.BytesIO(result)).convert('RGBA')
+
+    # Load the image
+    img = Image.open(io.BytesIO(input_data)).convert('RGB')
+    img = img.resize((320, 320))
+    img = np.array(img).astype(np.float32) / 255.0
+    img = img.transpose(2, 0, 1)
+    img = np.expand_dims(img, axis=0)
+
+    # Run the model
+    input_name = session.get_inputs()[0].name
+    result = session.run(None, {input_name: img})[0]
+
+    # Process the result
+    mask = result.squeeze()
+    mask = (mask > 0.5).astype(np.uint8) * 255
+    mask = Image.fromarray(mask).resize((path.width, path.height), Image.BILINEAR)
+
+    # Apply the mask to the image
+    img = Image.open(io.BytesIO(input_data)).convert('RGBA')
+    img.putalpha(mask)
+
     if Path(path).suffix != '.png':
         img.LOAD_TRUNCATED_IMAGES = True
-    return img
 
+    return img
 
 def gif2frames(input_file, skip_every=1):
     im = Image.open(input_file)
