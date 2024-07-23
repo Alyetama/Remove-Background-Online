@@ -37,6 +37,7 @@ def remove_bg(input_data, path):
 
     # Load the image
     img = Image.open(io.BytesIO(input_data)).convert('RGB')
+    original_size = img.size  # Lưu kích thước gốc
     img = img.resize((320, 320))
     img = np.array(img).astype(np.float32) / 255.0
     img = img.transpose(2, 0, 1)
@@ -49,7 +50,7 @@ def remove_bg(input_data, path):
     # Process the result
     mask = result.squeeze()
     mask = (mask > 0.5).astype(np.uint8) * 255
-    mask = Image.fromarray(mask).resize((path.width, path.height), Image.BILINEAR)
+    mask = Image.fromarray(mask).resize(original_size, Image.BILINEAR)  # Sử dụng kích thước gốc
 
     # Apply the mask to the image
     img = Image.open(io.BytesIO(input_data)).convert('RGBA')
