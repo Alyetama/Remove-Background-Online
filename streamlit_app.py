@@ -15,25 +15,25 @@ from PIL import Image, ImageSequence
 from dotenv import load_dotenv
 from gotipy import Gotify
 from loguru import logger
-from rembg.bg import remove
-
-import onnxruntime as ort
-
 import onnxruntime as ort
 import numpy as np
 
+from urllib import request
+
 def download_model():
-    model_dir = Path.home() / '.u2net'
-    model_path = model_dir / 'u2net.onnx'
+    model_dir = Path('models')
+    model_path = model_dir / 'u2net_human_seg.onnx'
     if not model_path.exists():
         model_dir.mkdir(parents=True, exist_ok=True)
         model_url = 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_human_seg.onnx'
+        # model_url = 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_cloth_seg.onnx'
         request.urlretrieve(model_url, model_path)
     return model_path
 
 def remove_bg(input_data, path):
     model_path = download_model()
     session = ort.InferenceSession(str(model_path))
+    print(model_path)
 
     # Load the image
     img = Image.open(io.BytesIO(input_data)).convert('RGB')
@@ -50,6 +50,7 @@ def remove_bg(input_data, path):
     # Process the result
     mask = result.squeeze()
     mask = (mask > 0.5).astype(np.uint8) * 255
+
     mask = Image.fromarray(mask).resize(original_size, Image.BILINEAR)  # Sử dụng kích thước gốc
 
     # Apply the mask to the image
@@ -60,6 +61,7 @@ def remove_bg(input_data, path):
         img.LOAD_TRUNCATED_IMAGES = True
 
     return img
+
 
 def gif2frames(input_file, skip_every=1):
     im = Image.open(input_file)
