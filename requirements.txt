@@ -7,3 +7,5 @@ onnxruntime
 # Extra
 python-dotenv==0.20.0
 gotipy==0.2
+onnx
+onnxruntime-tools
