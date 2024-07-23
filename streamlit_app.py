@@ -17,6 +17,7 @@ from gotipy import Gotify
 from loguru import logger
 from rembg.bg import remove
 
+import onnxruntime as ort
 
 def download_model():
     model_dir = Path.home() / '.u2net'
@@ -29,7 +30,8 @@ def download_model():
 
 def remove_bg(input_data, path):
     model_path = download_model()
-    result = remove(input_data, session=None, model_name='u2net', model_path=str(model_path))
+    session = ort.InferenceSession(str(model_path))
+    result = remove(input_data, session=session)
     img = Image.open(io.BytesIO(result)).convert('RGBA')
     if Path(path).suffix != '.png':
         img.LOAD_TRUNCATED_IMAGES = True
