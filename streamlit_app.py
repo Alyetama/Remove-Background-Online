@@ -16,11 +16,20 @@ from dotenv import load_dotenv
 from gotipy import Gotify
 from loguru import logger
 from rembg.bg import remove
-import download_model
 
+
+def download_model():
+    model_dir = Path.home() / '.u2net'
+    model_path = model_dir / 'u2net.onnx'
+    if not model_path.exists():
+        model_dir.mkdir(parents=True, exist_ok=True)
+        model_url = 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_human_seg.onnx'
+        request.urlretrieve(model_url, model_path)
+    return model_path
 
 def remove_bg(input_data, path):
-    result = remove(input_data)
+    model_path = download_model()
+    result = remove(input_data, session=None, model_name='u2net', model_path=str(model_path))
     img = Image.open(io.BytesIO(result)).convert('RGBA')
     if Path(path).suffix != '.png':
         img.LOAD_TRUNCATED_IMAGES = True
@@ -44,7 +53,7 @@ def gif2frames(input_file, skip_every=1):
     return frames
 
 def main():
-    download_model()
+    model_path = download_model()
     if GOTIFY:
         g = Gotify(host_address=os.getenv('GOTIFY_HOST_ADDRESS'),
                    fixed_token=os.getenv('GOTIFY_APP_TOKEN'),
