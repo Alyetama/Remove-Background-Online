@@ -29,7 +29,7 @@ def download_model():
     
     if not model_path.exists():
         model_dir.mkdir(parents=True, exist_ok=True)
-        model_url = 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/silueta.onnx'
+        model_url = 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx'
         # model_url = 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_human_seg.onnx'
         # model_url = 'https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net_cloth_seg.onnx'
         request.urlretrieve(model_url, model_path)
