@@ -95,7 +95,7 @@ def main():
                    fixed_token=os.getenv('GOTIFY_APP_TOKEN'),
                    fixed_priority=9)
 
-    if st.sidebar.button('CLEAR'):
+    if st.sidebar.button('CLEAR - new'):
         st.session_state['key'] = K
         st.session_state['processed'] = False
         st.session_state['cleared'] = True
