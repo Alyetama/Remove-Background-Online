@@ -35,7 +35,7 @@ def download_model():
         request.urlretrieve(model_url, model_path)
         
         # Quantize the model
-        quantize_dynamic(model_path, quantized_model_path, weight_type=QuantType.QUInt8)
+        # quantize_dynamic(model_path, quantized_model_path, weight_type=QuantType.QUInt8)
     
     return quantized_model_path
 
